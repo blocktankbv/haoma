@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 40px; }
+  h1 { color: #fff; text-align: center; font-size: 28px; margin-bottom: 10px; }
+  .subtitle { color: #8892b0; text-align: center; font-size: 14px; margin-bottom: 40px; }
+  .row { display: flex; justify-content: center; gap: 30px; margin-bottom: 50px; flex-wrap: wrap; }
+  .screen-wrap { text-align: center; }
+  .screen-label { color: #64ffda; font-size: 13px; font-weight: 600; margin-bottom: 8px; letter-spacing: 1px; }
+  .phone { width: 280px; height: 560px; background: #fff; border-radius: 32px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; border: 3px solid #333; }
+  .status-bar { height: 36px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 11px; font-weight: 600; }
+  .status-bar .time { color: #000; }
+  .status-bar .icons { color: #000; font-size: 10px; }
+  .screen-content { height: 480px; overflow: hidden; position: relative; }
+  .bottom-nav { height: 44px; background: #fff; border-top: 1px solid #e5e5e5; display: flex; justify-content: space-around; align-items: center; font-size: 9px; color: #999; position: absolute; bottom: 0; width: 100%; }
+  .bottom-nav .nav-item { text-align: center; line-height: 1.3; }
+  .bottom-nav .nav-item.active { color: #2d6a4f; }
+  .bottom-nav .nav-icon { font-size: 16px; }
+
+  /* Screen 1: Home */
+  .home-screen { padding: 16px; background: linear-gradient(180deg, #f0f7f0 0%, #fff 40%); height: 100%; }
+  .home-logo { text-align: center; margin-top: 20px; }
+  .home-logo .icon { font-size: 40px; }
+  .home-logo .name { font-size: 24px; font-weight: 700; color: #2d6a4f; margin-top: 4px; }
+  .home-logo .tagline { font-size: 12px; color: #6b7280; margin-top: 2px; }
+  .search-box { background: #f3f4f6; border-radius: 16px; padding: 14px 16px; margin-top: 24px; display: flex; align-items: center; gap: 8px; }
+  .search-box .mag { color: #9ca3af; font-size: 14px; }
+  .search-box .placeholder { color: #9ca3af; font-size: 13px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+  .chip { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 20px; padding: 6px 12px; font-size: 11px; color: #065f46; }
+  .section-title { font-size: 13px; font-weight: 600; color: #374151; margin-top: 20px; margin-bottom: 8px; }
+  .recent-item { background: #f9fafb; border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+  .recent-item .symptom { color: #374151; font-weight: 500; }
+  .recent-item .ago { color: #9ca3af; font-size: 10px; }
+
+  /* Screen 2: Results */
+  .results-screen { background: #fafafa; height: 100%; }
+  .results-header { background: #2d6a4f; color: #fff; padding: 12px 16px; }
+  .results-header .back { font-size: 11px; color: #a7f3d0; }
+  .results-header .query { font-size: 14px; font-weight: 600; margin-top: 4px; }
+  .results-header .count { font-size: 11px; color: #a7f3d0; margin-top: 2px; }
+  .results-list { padding: 12px; }
+  .plant-card { background: #fff; border-radius: 14px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; gap: 10px; }
+  .plant-card .plant-icon { width: 44px; height: 44px; background: #ecfdf5; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .plant-card .plant-info { flex: 1; }
+  .plant-card .plant-name { font-size: 13px; font-weight: 600; color: #1f2937; }
+  .plant-card .botanical { font-size: 9px; color: #9ca3af; font-style: italic; }
+  .plant-card .benefit { font-size: 10px; color: #6b7280; margin-top: 3px; }
+  .plant-card .badges { display: flex; gap: 4px; margin-top: 5px; }
+  .badge { font-size: 8px; padding: 2px 6px; border-radius: 8px; font-weight: 600; }
+  .badge-match { background: #d1fae5; color: #065f46; }
+  .badge-evidence { background: #dbeafe; color: #1e40af; }
+  .badge-forms { background: #f3f4f6; color: #6b7280; }
+
+  /* Screen 3: Plant Detail */
+  .detail-screen { background: #fff; height: 100%; }
+  .detail-hero { background: linear-gradient(135deg, #ecfdf5, #d1fae5); padding: 14px 16px; text-align: center; position: relative; }
+  .detail-hero .back-btn { position: absolute; left: 14px; top: 14px; font-size: 11px; color: #2d6a4f; }
+  .detail-hero .herb-icon { font-size: 48px; }
+  .detail-hero .herb-name { font-size: 18px; font-weight: 700; color: #1f2937; margin-top: 4px; }
+  .detail-hero .herb-latin { font-size: 10px; color: #6b7280; font-style: italic; }
+  .tabs { display: flex; border-bottom: 2px solid #e5e7eb; }
+  .tab { flex: 1; text-align: center; padding: 8px 0; font-size: 10px; font-weight: 600; color: #9ca3af; }
+  .tab.active { color: #2d6a4f; border-bottom: 2px solid #2d6a4f; margin-bottom: -2px; }
+  .detail-body { padding: 12px 14px; }
+  .compound-pills { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; margin-bottom: 10px; }
+  .compound { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 3px 8px; font-size: 9px; color: #166534; }
+  .desc-text { font-size: 10px; color: #4b5563; line-height: 1.5; }
+  .rating-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .stars { color: #f59e0b; font-size: 12px; }
+  .rating-label { font-size: 9px; color: #6b7280; }
+  .cta-btn { background: #2d6a4f; color: #fff; border-radius: 12px; padding: 10px; text-align: center; font-size: 12px; font-weight: 600; margin-top: 12px; }
+
+  /* Screen 4: How to Take */
+  .take-screen { background: #fff; height: 100%; }
+  .take-body { padding: 10px 12px; }
+  .form-row { display: flex; align-items: center; background: #f9fafb; border-radius: 10px; padding: 8px 10px; margin-bottom: 6px; gap: 8px; }
+  .form-icon { font-size: 18px; width: 28px; text-align: center; }
+  .form-info { flex: 1; }
+  .form-name { font-size: 11px; font-weight: 600; color: #1f2937; }
+  .form-dosage { font-size: 9px; color: #2d6a4f; font-weight: 500; }
+  .form-detail { font-size: 8px; color: #6b7280; margin-top: 1px; }
+  .form-onset { font-size: 8px; color: #9ca3af; }
+  .warning-box { background: #fef3c7; border-radius: 10px; padding: 8px 10px; margin-top: 8px; }
+  .warning-title { font-size: 10px; font-weight: 600; color: #92400e; }
+  .warning-text { font-size: 9px; color: #78350f; margin-top: 2px; line-height: 1.4; }
+
+  /* Screen 5: Combines With */
+  .combo-screen { background: #fff; height: 100%; }
+  .combo-body { padding: 10px 12px; }
+  .combo-section { margin-bottom: 10px; }
+  .combo-label { font-size: 10px; font-weight: 600; margin-bottom: 5px; }
+  .combo-label.green { color: #065f46; }
+  .combo-label.yellow { color: #92400e; }
+  .combo-label.red { color: #991b1b; }
+  .combo-card { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: #f9fafb; border-radius: 8px; margin-bottom: 4px; }
+  .combo-card.synergy { border-left: 3px solid #10b981; }
+  .combo-card.caution { border-left: 3px solid #f59e0b; }
+  .combo-card.avoid { border-left: 3px solid #ef4444; }
+  .combo-plant { font-size: 10px; font-weight: 600; color: #1f2937; }
+  .combo-effect { font-size: 9px; color: #6b7280; }
+  .stack-card { background: #ecfdf5; border-radius: 10px; padding: 10px; margin-top: 6px; }
+  .stack-title { font-size: 11px; font-weight: 600; color: #065f46; }
+  .stack-plants { font-size: 9px; color: #047857; margin-top: 2px; }
+  .stack-goal { font-size: 8px; color: #6b7280; margin-top: 2px; }
+
+  /* Screen 6: Product Finder */
+  .product-screen { background: #fafafa; height: 100%; }
+  .product-header { background: #2d6a4f; color: #fff; padding: 10px 14px; }
+  .product-header .title { font-size: 14px; font-weight: 600; }
+  .product-filters { display: flex; gap: 4px; margin-top: 6px; }
+  .filter-chip { background: rgba(255,255,255,0.2); border-radius: 12px; padding: 3px 10px; font-size: 9px; color: #fff; }
+  .filter-chip.active { background: #fff; color: #2d6a4f; }
+  .product-list { padding: 10px 12px; }
+  .product-card { background: #fff; border-radius: 12px; padding: 10px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+  .product-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .product-name { font-size: 11px; font-weight: 600; color: #1f2937; }
+  .product-brand { font-size: 9px; color: #6b7280; }
+  .product-price { font-size: 14px; font-weight: 700; color: #2d6a4f; }
+  .product-meta { display: flex; gap: 6px; margin-top: 5px; align-items: center; }
+  .stock-badge { font-size: 8px; padding: 2px 6px; border-radius: 6px; }
+  .stock-in { background: #d1fae5; color: #065f46; }
+  .stock-low { background: #fef3c7; color: #92400e; }
+  .product-btns { display: flex; gap: 6px; margin-top: 8px; }
+  .btn-buy { flex: 1; background: #2d6a4f; color: #fff; border-radius: 8px; padding: 6px; text-align: center; font-size: 10px; font-weight: 600; }
+  .btn-find { flex: 1; background: #f3f4f6; color: #374151; border-radius: 8px; padding: 6px; text-align: center; font-size: 10px; font-weight: 500; }
+
+  /* Screen 7: Store Map */
+  .map-screen { background: #fff; height: 100%; }
+  .map-area { height: 160px; background: linear-gradient(135deg, #d4e6d4, #b8d4b8); position: relative; display: flex; align-items: center; justify-content: center; }
+  .map-pin { position: absolute; font-size: 18px; }
+  .map-label { font-size: 12px; color: #2d6a4f; font-weight: 600; }
+  .store-list { padding: 10px 12px; }
+  .store-card { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+  .store-num { width: 22px; height: 22px; background: #2d6a4f; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+  .store-info { flex: 1; }
+  .store-name { font-size: 11px; font-weight: 600; color: #1f2937; }
+  .store-addr { font-size: 9px; color: #6b7280; }
+  .store-meta { font-size: 8px; color: #9ca3af; margin-top: 1px; }
+  .store-dist { font-size: 10px; font-weight: 600; color: #2d6a4f; white-space: nowrap; }
+
+  /* Screen 8: Protocol */
+  .protocol-screen { background: linear-gradient(180deg, #ecfdf5, #fff); height: 100%; padding: 12px 14px; }
+  .protocol-header-text { font-size: 15px; font-weight: 700; color: #1f2937; text-align: center; margin-top: 6px; }
+  .protocol-sub { font-size: 10px; color: #6b7280; text-align: center; margin-top: 2px; }
+  .day-counter { text-align: center; margin: 14px 0; }
+  .day-big { font-size: 36px; font-weight: 800; color: #2d6a4f; }
+  .day-of { font-size: 11px; color: #6b7280; }
+  .streak-badge { display: inline-block; background: #fef3c7; border-radius: 12px; padding: 4px 12px; font-size: 11px; color: #92400e; font-weight: 600; margin-top: 4px; }
+  .progress-bar-bg { height: 6px; background: #e5e7eb; border-radius: 3px; margin-top: 10px; }
+  .progress-bar-fill { height: 6px; background: #2d6a4f; border-radius: 3px; width: 35%; }
+  .checkin-section { margin-top: 14px; }
+  .checkin-q { font-size: 12px; font-weight: 600; color: #1f2937; text-align: center; }
+  .emoji-row { display: flex; justify-content: center; gap: 12px; margin-top: 8px; }
+  .emoji-btn { font-size: 24px; opacity: 0.4; }
+  .emoji-btn.selected { opacity: 1; transform: scale(1.2); }
+  .symptom-slider { margin-top: 10px; }
+  .slider-label { display: flex; justify-content: space-between; font-size: 9px; color: #6b7280; }
+  .slider-bar { height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 4px; position: relative; }
+  .slider-fill { height: 4px; background: #2d6a4f; border-radius: 2px; }
+  .slider-dot { width: 12px; height: 12px; background: #2d6a4f; border-radius: 50%; position: absolute; top: -4px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .checkin-btn { background: #2d6a4f; color: #fff; border-radius: 12px; padding: 10px; text-align: center; font-size: 12px; font-weight: 600; margin-top: 14px; }
+
+  .arrow { color: #64ffda; font-size: 28px; display: flex; align-items: center; margin: 0 -5px; padding-top: 200px; }
+</style>
+</head>
+<body>
+
+<h1>🌿 Haoma — Screen Wireframes</h1>
+<p class="subtitle">AI Herbalist App • Mobile-First Design</p>
+
+<!-- ROW 1: Home → Results → Plant Detail -->
+<div class="row">
+  <div class="screen-wrap">
+    <div class="screen-label">① HOME</div>
+    <div class="phone">
+      <div class="status-bar"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+      <div class="screen-content">
+        <div class="home-screen">
+          <div class="home-logo">
+            <div class="icon">🌿</div>
+            <div class="name">Haoma</div>
+            <div class="tagline">Your AI Herbalist</div>
+          </div>
+          <div class="search-box">
+            <span class="mag">🔍</span>
+            <span class="placeholder">What's bothering you?</span>
+          </div>
+          <div class="chips">
+            <div class="chip">😴 Sleep</div>
+            <div class="chip">😰 Anxiety</div>
+            <div class="chip">🤢 Digestion</div>
+            <div class="chip">⚡ Energy</div>
+            <div class="chip">🤕 Pain</div>
+            <div class="chip">🧠 Focus</div>
+            <div class="chip">🛡️ Immunity</div>
+          </div>
+          <div class="section-title">Recent Searches</div>
+          <div class="recent-item">
+            <span class="symptom">😴 Can't sleep, feeling anxious</span>
+            <span class="ago">2h ago</span>
+          </div>
+          <div class="recent-item">
+            <span class="symptom">🤢 Stomach pain after eating</span>
+            <span class="ago">1d ago</span>
+          </div>
+          <div class="recent-item">
+            <span class="symptom">🤕 Headache and tension</span>
+            <span class="ago">3d ago</span>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item active"><div class="nav-icon">🏠</div>Home</div>
+        <div class="nav-item"><div class="nav-icon">🌿</div>Plants</div>
+        <div class="nav-item"><div class="nav-icon">📊</div>Protocol</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>Profile</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <div class="screen-wrap">
+    <div class="screen-label">② PLANT RESULTS</div>
+    <div class="phone">
+      <div class="status-bar"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+      <div class="screen-content">
+        <div class="results-screen">
+          <div class="results-header">
+            <div class="back">← Back</div>
+            <div class="query">"Can't sleep, feeling anxious"</div>
+            <div class="count">5 plants found • AI-powered</div>
+          </div>
+          <div class="results-list">
+            <div class="plant-card">
+              <div class="plant-icon">🌸</div>
+              <div class="plant-info">
+                <div class="plant-name">Valerian</div>
+                <div class="botanical">Valeriana officinalis</div>
+                <div class="benefit">Natural sedative for deep, restful sleep</div>
+                <div class="badges">
+                  <span class="badge badge-match">92% match</span>
+                  <span class="badge badge-evidence">Clinical</span>
+                  <span class="badge badge-forms">🫖 💊 💧</span>
+                </div>
+              </div>
+            </div>
+            <div class="plant-card">
+              <div class="plant-icon">🌼</div>
+              <div class="plant-info">
+                <div class="plant-name">Passionflower</div>
+                <div class="botanical">Passiflora incarnata</div>
+                <div class="benefit">Calms racing thoughts, eases into sleep</div>
+                <div class="badges">
+                  <span class="badge badge-match">87% match</span>
+                  <span class="badge badge-evidence">Both</span>
+                  <span class="badge badge-forms">🫖 💊</span>
+                </div>
+              </div>
+            </div>
+            <div class="plant-card">
+              <div class="plant-icon">🌾</div>
+              <div class="plant-info">
+                <div class="plant-name">Ashwagandha</div>
+                <div class="botanical">Withania somnifera</div>
+                <div class="benefit">Reduces cortisol, adaptogenic stress relief</div>
+                <div class="badges">
+                  <span class="badge badge-match">81% match</span>
+                  <span class="badge badge-evidence">Clinical</span>
+                  <span class="badge badge-forms">💊 🧪</span>
+                </div>
+              </div>
+            </div>
+            <div class="plant-card">
+              <div class="plant-icon">🌿</div>
+              <div class="plant-info">
+                <div class="plant-name">Chamomile</div>
+                <div class="botanical">Matricaria chamomilla</div>
+                <div class="benefit">Gentle anxiety relief, aids digestion</div>
+                <div class="badges">
+                  <span class="badge badge-match">76% match</span>
+                  <span class="badge badge-evidence">Both</span>
+                  <span class="badge badge-forms">🫖 💧</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">🏠</div>Home</div>
+        <div class="nav-item active"><div class="nav-icon">🌿</div>Plants</div>
+        <div class="nav-item"><div class="nav-icon">📊</div>Protocol</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>Profile</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <div class="screen-wrap">
+    <div class="screen-label">③ PLANT DETAIL — Overview</div>
+    <div class="phone">
+      <div class="status-bar"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+      <div class="screen-content">
+        <div class="detail-screen">
+          <div class="detail-hero">
+            <div class="back-btn">← Back</div>
+            <div class="herb-icon">🌸</div>
+            <div class="herb-name">Valerian</div>
+            <div class="herb-latin">Valeriana officinalis</div>
+          </div>
+          <div class="tabs">
+            <div class="tab active">Overview</div>
+            <div class="tab">How to Take</div>
+            <div class="tab">Combines</div>
+          </div>
+          <div class="detail-body">
+            <p class="desc-text">One of the most studied herbal sedatives. Used for centuries to treat insomnia and nervous restlessness. Works by increasing GABA levels in the brain.</p>
+            <div class="section-title" style="font-size:10px; margin-top:10px;">Key Compounds</div>
+            <div class="compound-pills">
+              <span class="compound">Valerenic acid</span>
+              <span class="compound">Isovaleric acid</span>
+              <span class="compound">Hesperidin</span>
+              <span class="compound">GABA</span>
+            </div>
+            <div class="rating-row">
+              <span class="stars">★★★★☆</span>
+              <span class="rating-label">Strong clinical evidence</span>
+            </div>
+            <div style="font-size:9px; color:#6b7280; margin-top:8px;">📅 Recommended: 2-4 weeks for full effect</div>
+            <div class="cta-btn">▶️ Start Protocol</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">🏠</div>Home</div>
+        <div class="nav-item active"><div class="nav-icon">🌿</div>Plants</div>
+        <div class="nav-item"><div class="nav-icon">📊</div>Protocol</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>Profile</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 2: How to Take → Combines With → Product Finder -->
+<div class="row">
+  <div class="screen-wrap">
+    <div class="screen-label">④ HOW TO TAKE</div>
+    <div class="phone">
+      <div class="status-bar"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+      <div class="screen-content">
+        <div class="take-screen">
+          <div class="detail-hero" style="padding: 10px 14px;">
+            <div class="back-btn">← Back</div>
+            <div class="herb-icon" style="font-size:32px;">🌸</div>
+            <div class="herb-name" style="font-size:15px;">Valerian</div>
+          </div>
+          <div class="tabs">
+            <div class="tab">Overview</div>
+            <div class="tab active">How to Take</div>
+            <div class="tab">Combines</div>
+          </div>
+          <div class="take-body">
+            <div class="form-row">
+              <div class="form-icon">🫖</div>
+              <div class="form-info">
+                <div class="form-name">Tea (Dried Root)</div>
+                <div class="form-dosage">2-3g • Steep 10-15 min</div>
+                <div class="form-detail">Take 1hr before bed • Best for mild issues</div>
+                <div class="form-onset">⏱ Onset: 30-60 min • Lasts 4-6 hrs</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-icon">💊</div>
+              <div class="form-info">
+                <div class="form-name">Capsule</div>
+                <div class="form-dosage">300-600mg • Swallow with water</div>
+                <div class="form-detail">Take 30 min before bed • Consistent dosing</div>
+                <div class="form-onset">⏱ Onset: 20-45 min • Lasts 6-8 hrs</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-icon">💧</div>
+              <div class="form-info">
+                <div class="form-name">Tincture</div>
+                <div class="form-dosage">1-2ml (20-40 drops) • In water or sublingual</div>
+                <div class="form-detail">Take 2x daily • Fast absorption</div>
+                <div class="form-onset">⏱ Onset: 15-30 min • Lasts 3-4 hrs</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-icon">🧪</div>
+              <div class="form-info">
+                <div class="form-name">Standardized Extract</div>
+                <div class="form-dosage">150-300mg • Swallow with water</div>
+                <div class="form-detail">As directed • Maximum potency</div>
+                <div class="form-onset">⏱ Onset: 20-40 min • Lasts 6-8 hrs</div>
+              </div>
+            </div>
+            <div class="warning-box">
+              <div class="warning-title">⚠️ Side Effects & Cautions</div>
+              <div class="warning-text">Headache, dizziness, stomach upset (rare). Avoid with sedatives, alcohol, before surgery. Not for pregnancy/breastfeeding.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">🏠</div>Home</div>
+        <div class="nav-item active"><div class="nav-icon">🌿</div>Plants</div>
+        <div class="nav-item"><div class="nav-icon">📊</div>Protocol</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>Profile</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <div class="screen-wrap">
+    <div class="screen-label">⑤ COMBINES WITH</div>
+    <div class="phone">
+      <div class="status-bar"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+      <div class="screen-content">
+        <div class="combo-screen">
+          <div class="detail-hero" style="padding: 10px 14px;">
+            <div class="back-btn">← Back</div>
+            <div class="herb-icon" style="font-size:32px;">🌸</div>
+            <div class="herb-name" style="font-size:15px;">Valerian</div>
+          </div>
+          <div class="tabs">
+            <div class="tab">Overview</div>
+            <div class="tab">How to Take</div>
+            <div class="tab active">Combines</div>
+          </div>
+          <div class="combo-body">
+            <div class="combo-section">
+              <div class="combo-label green">✅ Synergies</div>
+              <div class="combo-card synergy">
+                <span style="font-size:16px;">🌼</span>
+                <div>
+                  <div class="combo-plant">Passionflower</div>
+                  <div class="combo-effect">Enhanced sleep quality & duration</div>
+                </div>
+              </div>
+              <div class="combo-card synergy">
+                <span style="font-size:16px;">🍃</span>
+                <div>
+                  <div class="combo-plant">Lemon Balm</div>
+                  <div class="combo-effect">Reduced anxiety + better sleep onset</div>
+                </div>
+              </div>
+              <div class="combo-card synergy">
+                <span style="font-size:16px;">🌿</span>
+                <div>
+                  <div class="combo-plant">Chamomile</div>
+                  <div class="combo-effect">Gentle calming synergy</div>
+                </div>
+              </div>
+            </div>
+            <div class="combo-section">
+              <div class="combo-label yellow">⚠️ Use with Caution</div>
+              <div class="combo-card caution">
+                <span style="font-size:16px;">🌴</span>
+                <div>
+                  <div class="combo-plant">Kava</div>
+                  <div class="combo-effect">Risk of excessive sedation</div>
+                </div>
+              </div>
+            </div>
+            <div class="combo-section">
+              <div class="combo-label green">💡 Pre-built Stack</div>
+              <div class="stack-card">
+                <div class="stack-title">🌙 Deep Sleep Stack</div>
+                <div class="stack-plants">Valerian + Passionflower + Magnesium</div>
+                <div class="stack-goal">Take 1hr before bed • 2-4 week protocol</div>
+              </div>
+              <div class="stack-card" style="margin-top:4px;">
+                <div class="stack-title">😌 Calm Mind Stack</div>
+                <div class="stack-plants">Valerian + Lemon Balm + L-Theanine</div>
+                <div class="stack-goal">Take 2x daily • Reduces daytime anxiety</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">🏠</div>Home</div>
+        <div class="nav-item active"><div class="nav-icon">🌿</div>Plants</div>
+        <div class="nav-item"><div class="nav-icon">📊</div>Protocol</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>Profile</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <div class="screen-wrap">
+    <div class="screen-label">⑥ PRODUCT FINDER</div>
+    <div class="phone">
+      <div class="status-bar"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+      <div class="screen-content">
+        <div class="product-screen">
+          <div class="product-header">
+            <div class="back" style="font-size:11px; color:#a7f3d0;">← Valerian</div>
+            <div class="title">🛒 Find Products</div>
+            <div class="product-filters">
+              <div class="filter-chip active">All</div>
+              <div class="filter-chip">🫖 Tea</div>
+              <div class="filter-chip">💊 Capsule</div>
+              <div class="filter-chip">💧 Tincture</div>
+            </div>
+          </div>
+          <div class="product-list">
+            <div class="product-card">
+              <div class="product-top">
+                <div>
+                  <div class="product-name">Valerian Root 500mg Capsules</div>
+                  <div class="product-brand">Holland & Barrett</div>
+                </div>
+                <div class="product-price">€12.99</div>
+              </div>
+              <div class="product-meta">
+                <span class="badge badge-forms">💊 60 caps</span>
+                <span class="stock-badge stock-in">🟢 In Stock</span>
+                <span style="font-size:9px; color:#f59e0b;">★ 4.5</span>
+              </div>
+              <div class="product-btns">
+                <div class="btn-buy">Buy Online →</div>
+                <div class="btn-find">📍 Find Store</div>
+              </div>
+            </div>
+            <div class="product-card">
+              <div class="product-top">
+                <div>
+                  <div class="product-name">Valerian Root Tea</div>
+                  <div class="product-brand">Jacob Hooy</div>
+                </div>
+                <div class="product-price">€4.50</div>
+              </div>
+              <div class="product-meta">
+                <span class="badge badge-forms">🫖 50g loose</span>
+                <span class="stock-badge stock-in">🟢 In Stock</span>
+                <span style="font-size:9px; color:#f59e0b;">★ 4.8</span>
+              </div>
+              <div class="product-btns">
+                <div class="btn-buy">Buy Online →</div>
+                <div class="btn-find">📍 300m away</div>
+              </div>
+            </div>
+            <div class="product-card">
+              <div class="product-top">
+                <div>
+                  <div class="product-name">Valerian Tincture 50ml</div>
+                  <div class="product-brand">De Tuinen</div>
+                </div>
+                <div class="product-price">€8.95</div>
+              </div>
+              <div class="product-meta">
+                <span class="badge badge-forms">💧 Tincture</span>
+                <span class="stock-badge stock-low">🟡 Low Stock</span>
+                <span style="font-size:9px; color:#f59e0b;">★ 4.2</span>
+              </div>
+              <div class="product-btns">
+                <div class="btn-buy">Buy Online →</div>
+                <div class="btn-find">📍 500m away</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">🏠</div>Home</div>
+        <div class="nav-item active"><div class="nav-icon">🌿</div>Plants</div>
+        <div class="nav-item"><div class="nav-icon">📊</div>Protocol</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>Profile</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 3: Store Map → Protocol Tracker -->
+<div class="row">
+  <div class="screen-wrap">
+    <div class="screen-label">⑦ STORE MAP</div>
+    <div class="phone">
+      <div class="status-bar"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+      <div class="screen-content">
+        <div class="map-screen">
+          <div class="map-area">
+            <div class="map-pin" style="top:30px; left:100px;">📍</div>
+            <div class="map-pin" style="top:60px; left:160px;">📍</div>
+            <div class="map-pin" style="top:50px; left:80px;">📍</div>
+            <div class="map-pin" style="top:90px; left:190px;">📍</div>
+            <div class="map-pin" style="top:110px; left:120px;">📍</div>
+            <div style="position:absolute; top:70px; left:110px; font-size:20px;">📌</div>
+            <div style="position:absolute; bottom:6px; right:8px; font-size:8px; color:#2d6a4f; background:rgba(255,255,255,0.8); padding:2px 6px; border-radius:4px;">Amsterdam Centrum</div>
+          </div>
+          <div class="store-list">
+            <div class="store-card">
+              <div class="store-num">1</div>
+              <div class="store-info">
+                <div class="store-name">Jacob Hooy & Co</div>
+                <div class="store-addr">Kloveniersburgwal 12</div>
+                <div class="store-meta">Mon-Sat 9:00-18:00 • 3 products</div>
+              </div>
+              <div class="store-dist">0.3 km</div>
+            </div>
+            <div class="store-card">
+              <div class="store-num">2</div>
+              <div class="store-info">
+                <div class="store-name">De Tuinen</div>
+                <div class="store-addr">Kalverstraat 134</div>
+                <div class="store-meta">Mon-Sat 9:30-18:00 • 2 products</div>
+              </div>
+              <div class="store-dist">0.5 km</div>
+            </div>
+            <div class="store-card">
+              <div class="store-num">3</div>
+              <div class="store-info">
+                <div class="store-name">Holland & Barrett</div>
+                <div class="store-addr">Damrak 81</div>
+                <div class="store-meta">Mon-Sun 9:00-21:00 • 5 products</div>
+              </div>
+              <div class="store-dist">0.8 km</div>
+            </div>
+            <div class="store-card">
+              <div class="store-num">4</div>
+              <div class="store-info">
+                <div class="store-name">Ekoplaza</div>
+                <div class="store-addr">Sarphatistraat 27</div>
+                <div class="store-meta">Mon-Sat 8:00-20:00 • 2 products</div>
+              </div>
+              <div class="store-dist">1.2 km</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">🏠</div>Home</div>
+        <div class="nav-item active"><div class="nav-icon">🌿</div>Plants</div>
+        <div class="nav-item"><div class="nav-icon">📊</div>Protocol</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>Profile</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <div class="screen-wrap">
+    <div class="screen-label">⑧ PROTOCOL TRACKER</div>
+    <div class="phone">
+      <div class="status-bar"><span class="time">9:41</span><span class="icons">📶 🔋</span></div>
+      <div class="screen-content">
+        <div class="protocol-screen">
+          <div class="protocol-header-text">🌸 Valerian Protocol</div>
+          <div class="protocol-sub">💊 Capsule 300mg • Before bed</div>
+          <div class="day-counter">
+            <div class="day-big">Day 5</div>
+            <div class="day-of">of 28 days</div>
+            <div class="streak-badge">🔥 5-day streak</div>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width:18%;"></div>
+          </div>
+          <div class="checkin-section">
+            <div class="checkin-q">How do you feel today?</div>
+            <div class="emoji-row">
+              <span class="emoji-btn">😫</span>
+              <span class="emoji-btn">😕</span>
+              <span class="emoji-btn">😐</span>
+              <span class="emoji-btn selected">🙂</span>
+              <span class="emoji-btn">😊</span>
+            </div>
+            <div class="symptom-slider" style="margin-top:12px;">
+              <div class="slider-label"><span>Sleep Quality</span><span>7/10</span></div>
+              <div class="slider-bar"><div class="slider-fill" style="width:70%;"></div><div class="slider-dot" style="left:calc(70% - 6px);"></div></div>
+            </div>
+            <div class="symptom-slider" style="margin-top:8px;">
+              <div class="slider-label"><span>Time to Fall Asleep</span><span>6/10</span></div>
+              <div class="slider-bar"><div class="slider-fill" style="width:60%;"></div><div class="slider-dot" style="left:calc(60% - 6px);"></div></div>
+            </div>
+            <div class="symptom-slider" style="margin-top:8px;">
+              <div class="slider-label"><span>Anxiety Level</span><span>4/10</span></div>
+              <div class="slider-bar"><div class="slider-fill" style="width:40%;"></div><div class="slider-dot" style="left:calc(40% - 6px);"></div></div>
+            </div>
+            <div class="checkin-btn">✅ Check In</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">🏠</div>Home</div>
+        <div class="nav-item"><div class="nav-icon">🌿</div>Plants</div>
+        <div class="nav-item active"><div class="nav-icon">📊</div>Protocol</div>
+        <div class="nav-item"><div class="nav-icon">👤</div>Profile</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
